@@ -1,0 +1,16 @@
+# Project exclude paths
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Android Studio
+.idea/
+*.iml
+local.properties
+
+# Arquivos gerados
+app/release/
+*.apk
+*.aab
+*.keystore

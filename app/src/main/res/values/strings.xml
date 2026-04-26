@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MarketCart</string>
+
+    <!-- Geral -->
+    <string name="salvar">Salvar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="excluir">Excluir</string>
+    <string name="voltar">Voltar</string>
+    <string name="sim">Sim</string>
+    <string name="nao">Não</string>
+
+    <!-- MainActivity -->
+    <string name="minhas_listas">Minhas Listas</string>
+    <string name="nova_lista">Nova Lista</string>
+    <string name="sem_listas">Nenhuma lista criada ainda.\nToque em + para começar!</string>
+
+    <!-- NovaListaActivity -->
+    <string name="criar_lista">Criar Lista</string>
+    <string name="nome_lista">Nome da lista</string>
+    <string name="orcamento">Orçamento (R$)</string>
+    <string name="hint_nome_lista">Ex: Compras da semana</string>
+    <string name="hint_orcamento">Ex: 150,00</string>
+    <string name="campo_obrigatorio">Este campo é obrigatório</string>
+
+    <!-- ItensActivity -->
+    <string name="itens_da_lista">Itens da Lista</string>
+    <string name="novo_item">Novo Item</string>
+    <string name="sem_itens">Nenhum item adicionado.\nToque em + para adicionar!</string>
+    <string name="total">Total: R$ %1$.2f</string>
+    <string name="orcamento_label">Orçamento: R$ %1$.2f</string>
+
+    <!-- NovoItemActivity -->
+    <string name="adicionar_item">Adicionar Item</string>
+    <string name="nome_produto">Nome do produto</string>
+    <string name="quantidade">Quantidade</string>
+    <string name="unidade">Unidade</string>
+    <string name="preco_unitario">Preço unitário (R$)</string>
+    <string name="categoria">Categoria</string>
+    <string name="hint_produto">Ex: Arroz</string>
+    <string name="hint_quantidade">Ex: 2</string>
+    <string name="hint_preco">Ex: 8,50</string>
+
+    <!-- Categorias -->
+    <string-array name="categorias">
+        <item>Selecione uma categoria</item>
+        <item>Hortifruti</item>
+        <item>Carnes</item>
+        <item>Laticínios</item>
+        <item>Bebidas</item>
+        <item>Limpeza</item>
+        <item>Higiene</item>
+        <item>Padaria</item>
+        <item>Congelados</item>
+        <item>Outros</item>
+    </string-array>
+
+    <!-- Unidades -->
+    <string-array name="unidades">
+        <item>un</item>
+        <item>kg</item>
+        <item>g</item>
+        <item>L</item>
+        <item>ml</item>
+        <item>pct</item>
+        <item>cx</item>
+    </string-array>
+</resources>
