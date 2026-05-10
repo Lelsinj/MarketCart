@@ -20,9 +20,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Código de retorno ao voltar da NovaListaActivity
-    public static final int REQUEST_NOVA_LISTA = 1;
-
     private RecyclerView recyclerListas;
     private View layoutVazio;
     private ListaAdapter adapter;
@@ -33,39 +30,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Storage
-        storage = new StorageManager(this);
-
-        // Views
+        storage        = new StorageManager(this);
         recyclerListas = findViewById(R.id.recyclerListas);
         layoutVazio    = findViewById(R.id.layoutVazio);
 
-        // Configura o RecyclerView
         recyclerListas.setLayoutManager(new LinearLayoutManager(this));
 
-        List<ListaCompras> listas = storage.carregarListas();
-
-        adapter = new ListaAdapter(listas, new ListaAdapter.OnListaClickListener() {
+        adapter = new ListaAdapter(storage.carregarListas(), new ListaAdapter.OnListaClickListener() {
 
             @Override
             public void onListaClick(ListaCompras lista) {
-                // Navega para a tela de itens passando o ID da lista
                 Intent intent = new Intent(MainActivity.this, ItensActivity.class);
                 intent.putExtra(ItensActivity.EXTRA_LISTA_ID, lista.getId());
-                startActivityForResult(intent, REQUEST_NOVA_LISTA);
+                startActivity(intent);
             }
 
             @Override
             public void onListaLongClick(ListaCompras lista) {
-                // Confirma exclusão
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Excluir lista")
-                        .setMessage("Deseja excluir a lista \"" + lista.getNome() + "\"?")
-                        .setPositiveButton("Excluir", (dialog, which) -> {
+                        .setMessage("Deseja excluir \"" + lista.getNome() + "\"?\nEsta ação não pode ser desfeita.")
+                        .setPositiveButton("Excluir", (d, w) -> {
                             storage.removerLista(lista.getId());
                             recarregarListas();
                         })
@@ -75,17 +63,13 @@ public class MainActivity extends AppCompatActivity {
         });
 
         recyclerListas.setAdapter(adapter);
-        atualizarEstadoVazio(listas);
 
-        // FAB: abrir formulário de nova lista
         FloatingActionButton fab = findViewById(R.id.fabNovaLista);
-        fab.setOnClickListener(v -> {
-            Intent intent = new Intent(this, NovaListaActivity.class);
-            startActivityForResult(intent, REQUEST_NOVA_LISTA);
-        });
+        fab.setOnClickListener(v ->
+                startActivity(new Intent(this, NovaListaActivity.class))
+        );
     }
 
-    // Recarrega ao voltar de outra tela
     @Override
     protected void onResume() {
         super.onResume();
@@ -95,16 +79,7 @@ public class MainActivity extends AppCompatActivity {
     private void recarregarListas() {
         List<ListaCompras> listas = storage.carregarListas();
         adapter.atualizarListas(listas);
-        atualizarEstadoVazio(listas);
-    }
-
-    private void atualizarEstadoVazio(List<ListaCompras> listas) {
-        if (listas.isEmpty()) {
-            layoutVazio.setVisibility(View.VISIBLE);
-            recyclerListas.setVisibility(View.GONE);
-        } else {
-            layoutVazio.setVisibility(View.GONE);
-            recyclerListas.setVisibility(View.VISIBLE);
-        }
+        layoutVazio.setVisibility(listas.isEmpty() ? View.VISIBLE : View.GONE);
+        recyclerListas.setVisibility(listas.isEmpty() ? View.GONE : View.VISIBLE);
     }
 }

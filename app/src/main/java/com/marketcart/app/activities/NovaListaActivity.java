@@ -26,12 +26,10 @@ public class NovaListaActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nova_lista);
 
-        // Toolbar com botão voltar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
+        if (getSupportActionBar() != null)
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
         storage      = new StorageManager(this);
@@ -47,29 +45,21 @@ public class NovaListaActivity extends AppCompatActivity {
         String nome = edtNome.getText() != null
                 ? edtNome.getText().toString().trim() : "";
 
-        // Validação
         if (TextUtils.isEmpty(nome)) {
-            layoutNome.setError(getString(R.string.campo_obrigatorio));
+            layoutNome.setError("Nome obrigatório");
             return;
         }
         layoutNome.setError(null);
 
         double orcamento = 0;
-        String orcamentoStr = edtOrcamento.getText() != null
-                ? edtOrcamento.getText().toString().trim() : "";
-        if (!TextUtils.isEmpty(orcamentoStr)) {
-            try {
-                orcamento = Double.parseDouble(orcamentoStr.replace(",", "."));
-            } catch (NumberFormatException e) {
-                orcamento = 0;
-            }
-        }
+        try {
+            String s = edtOrcamento.getText() != null
+                    ? edtOrcamento.getText().toString().trim() : "";
+            if (!s.isEmpty()) orcamento = Double.parseDouble(s.replace(",", "."));
+        } catch (NumberFormatException ignored) {}
 
-        // Cria e salva a nova lista
-        ListaCompras novaLista = new ListaCompras(nome, orcamento);
-        storage.adicionarLista(novaLista);
-
-        Toast.makeText(this, "Lista criada com sucesso!", Toast.LENGTH_SHORT).show();
-        finish(); // Volta para a MainActivity
+        storage.adicionarLista(new ListaCompras(nome, orcamento));
+        Toast.makeText(this, "Lista criada!", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

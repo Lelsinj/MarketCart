@@ -11,7 +11,6 @@ public class ListaCompras {
     private double orcamento;
     private List<Item> itens;
 
-    // Construtor padrão necessário para o Gson
     public ListaCompras() {
         this.id = UUID.randomUUID().toString();
         this.itens = new ArrayList<>();
@@ -24,18 +23,35 @@ public class ListaCompras {
         this.itens = new ArrayList<>();
     }
 
-    // Calcula o total dos itens marcados como comprado
+    /** Total apenas dos itens marcados como comprado */
     public double calcularTotal() {
         double total = 0;
         for (Item item : itens) {
             if (item.isComprado()) {
-                total += item.getPreco() * item.getQuantidade();
+                total += item.getSubtotal();
             }
         }
         return total;
     }
 
-    // Getters e Setters
+    /** Total geral (todos os itens, independente de comprado) */
+    public double calcularTotalGeral() {
+        double total = 0;
+        for (Item item : itens) {
+            total += item.getSubtotal();
+        }
+        return total;
+    }
+
+    /** Quantidade de itens já comprados */
+    public int quantidadeComprados() {
+        int count = 0;
+        for (Item item : itens) {
+            if (item.isComprado()) count++;
+        }
+        return count;
+    }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -45,6 +61,9 @@ public class ListaCompras {
     public double getOrcamento() { return orcamento; }
     public void setOrcamento(double orcamento) { this.orcamento = orcamento; }
 
-    public List<Item> getItens() { return itens; }
+    public List<Item> getItens() {
+        if (itens == null) itens = new ArrayList<>();
+        return itens;
+    }
     public void setItens(List<Item> itens) { this.itens = itens; }
 }

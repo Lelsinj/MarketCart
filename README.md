@@ -111,12 +111,12 @@ git clone https://github.com/seu-usuario/MarketCart.git
 
 ## 📁 Entrega
 
-| Entrega                                                                           | Status |
-|-----------------------------------------------------------------------------------|---|
-| Entrega Parcial 2 — Estrutura, telas iniciais e navegação                         | ✅ Concluída |
-| Entrega Parcial 3 - Banco de dados, CRUD, Integração entre telas                  | 🔄 Em desenvolvimento |
-| Entrega Parcial 4 - Funcionalidades completas, Melhoria de interface e Validações | 🔄 Em desenvolvimento |
-| Entrega Final                                                                     | 🔄 Em desenvolvimento |
+| Entrega                                                                                           | Status |
+|---------------------------------------------------------------------------------------------------|---|
+| Entrega Parcial 2 — Estrutura, telas iniciais e navegação                                         | ✅ Concluída |
+| Entrega Parcial 3 - CRUD, Integração entre telas                                                  | 🔄 Em desenvolvimento |
+| Entrega Parcial 4 - Banco de dados, Funcionalidades completas, Melhoria de interface e Validações | 🔄 Em desenvolvimento |
+| Entrega Final                                                                                     | 🔄 Em desenvolvimento |
 
 ---
 

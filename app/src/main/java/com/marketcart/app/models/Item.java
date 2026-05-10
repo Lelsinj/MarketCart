@@ -12,7 +12,6 @@ public class Item {
     private boolean comprado;
     private String categoria;
 
-    // Construtor padrão necessário para o Gson
     public Item() {
         this.id = UUID.randomUUID().toString();
         this.comprado = false;
@@ -28,7 +27,6 @@ public class Item {
         this.comprado = false;
     }
 
-    // Getters e Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
@@ -49,4 +47,9 @@ public class Item {
 
     public String getCategoria() { return categoria; }
     public void setCategoria(String categoria) { this.categoria = categoria; }
+
+    /** Subtotal deste item (preco x quantidade) */
+    public double getSubtotal() {
+        return preco * quantidade;
+    }
 }

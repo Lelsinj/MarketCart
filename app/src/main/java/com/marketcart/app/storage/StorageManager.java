@@ -24,13 +24,10 @@ public class StorageManager {
         gson  = new Gson();
     }
 
-    // ── Listas ──────────────────────────────────────────────────────────────
-
     /** Retorna todas as listas salvas. Nunca retorna null. */
     public List<ListaCompras> carregarListas() {
         String json = prefs.getString(KEY_LISTAS, null);
         if (json == null) return new ArrayList<>();
-
         Type tipo = new TypeToken<ArrayList<ListaCompras>>() {}.getType();
         List<ListaCompras> listas = gson.fromJson(json, tipo);
         return listas != null ? listas : new ArrayList<>();
@@ -38,11 +35,10 @@ public class StorageManager {
 
     /** Substitui toda a lista salva pela nova. */
     public void salvarListas(List<ListaCompras> listas) {
-        String json = gson.toJson(listas);
-        prefs.edit().putString(KEY_LISTAS, json).apply();
+        prefs.edit().putString(KEY_LISTAS, gson.toJson(listas)).apply();
     }
 
-    /** Adiciona uma nova lista ao storage. */
+    /** Adiciona uma nova lista. */
     public void adicionarLista(ListaCompras lista) {
         List<ListaCompras> listas = carregarListas();
         listas.add(lista);

@@ -2,6 +2,7 @@ package com.marketcart.app.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -26,6 +27,7 @@ public class ItensActivity extends AppCompatActivity {
     private View layoutVazio;
     private TextView txtOrcamento;
     private TextView txtTotal;
+    private TextView txtProgresso;
     private ItemAdapter adapter;
     private StorageManager storage;
     private ListaCompras lista;
@@ -37,16 +39,11 @@ public class ItensActivity extends AppCompatActivity {
 
         storage = new StorageManager(this);
 
-        // Recupera o ID da lista passado pela MainActivity
         String listaId = getIntent().getStringExtra(EXTRA_LISTA_ID);
         lista = storage.buscarListaPorId(listaId);
+        if (lista == null) { finish(); return; }
 
-        if (lista == null) {
-            finish();
-            return;
-        }
-
-        // Toolbar com nome da lista
+        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -56,10 +53,11 @@ public class ItensActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         // Views
-        recyclerItens = findViewById(R.id.recyclerItens);
-        layoutVazio   = findViewById(R.id.layoutVazio);
-        txtOrcamento  = findViewById(R.id.txtOrcamento);
-        txtTotal      = findViewById(R.id.txtTotal);
+        recyclerItens  = findViewById(R.id.recyclerItens);
+        layoutVazio    = findViewById(R.id.layoutVazio);
+        txtOrcamento   = findViewById(R.id.txtOrcamento);
+        txtTotal       = findViewById(R.id.txtTotal);
+        txtProgresso   = findViewById(R.id.txtProgresso);
 
         recyclerItens.setLayoutManager(new LinearLayoutManager(this));
 
@@ -67,10 +65,10 @@ public class ItensActivity extends AppCompatActivity {
 
             @Override
             public void onCheckChanged(Item item, boolean comprado) {
-                // Atualiza o item na lista em memória e salva no storage
+                // Atualiza o item na lista em memória e persiste
                 item.setComprado(comprado);
                 storage.atualizarLista(lista);
-                atualizarTotal();
+                atualizarResumo();
             }
 
             @Override
@@ -78,12 +76,12 @@ public class ItensActivity extends AppCompatActivity {
                 new AlertDialog.Builder(ItensActivity.this)
                         .setTitle("Excluir item")
                         .setMessage("Deseja excluir \"" + item.getNome() + "\"?")
-                        .setPositiveButton("Excluir", (dialog, which) -> {
+                        .setPositiveButton("Excluir", (d, w) -> {
                             lista.getItens().remove(item);
                             storage.atualizarLista(lista);
                             adapter.atualizarItens(lista.getItens());
                             atualizarEstadoVazio();
-                            atualizarTotal();
+                            atualizarResumo();
                         })
                         .setNegativeButton("Cancelar", null)
                         .show();
@@ -92,9 +90,8 @@ public class ItensActivity extends AppCompatActivity {
 
         recyclerItens.setAdapter(adapter);
         atualizarEstadoVazio();
-        atualizarTotal();
+        atualizarResumo();
 
-        // FAB: novo item
         FloatingActionButton fab = findViewById(R.id.fabNovoItem);
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(this, NovoItemActivity.class);
@@ -106,27 +103,40 @@ public class ItensActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Recarrega a lista ao voltar do formulário de novo item
+        // Recarrega do storage para refletir itens recém-adicionados
         lista = storage.buscarListaPorId(lista.getId());
-        if (lista != null) {
-            adapter.atualizarItens(lista.getItens());
-            atualizarEstadoVazio();
-            atualizarTotal();
-        }
+        if (lista == null) { finish(); return; }
+        if (getSupportActionBar() != null) getSupportActionBar().setTitle(lista.getNome());
+        adapter.atualizarItens(lista.getItens());
+        atualizarEstadoVazio();
+        atualizarResumo();
     }
 
-    private void atualizarTotal() {
-        txtOrcamento.setText(String.format("R$ %.2f", lista.getOrcamento()));
-        txtTotal.setText(String.format("R$ %.2f", lista.calcularTotal()));
+    /** Atualiza os valores de orçamento, total e progresso no card superior */
+    private void atualizarResumo() {
+        double orcamento = lista.getOrcamento();
+        double total     = lista.calcularTotal();
+        int comprados    = lista.quantidadeComprados();
+        int totalItens   = lista.getItens().size();
+
+        txtOrcamento.setText(String.format("R$ %.2f", orcamento));
+        txtTotal.setText(String.format("R$ %.2f", total));
+
+        if (txtProgresso != null) {
+            txtProgresso.setText(comprados + " de " + totalItens + " itens comprados");
+        }
+
+        // Aviso visual se ultrapassar orçamento
+        if (orcamento > 0 && total > orcamento) {
+            txtTotal.setTextColor(Color.parseColor("#FF5252")); // vermelho
+        } else {
+            txtTotal.setTextColor(Color.WHITE);
+        }
     }
 
     private void atualizarEstadoVazio() {
-        if (lista.getItens().isEmpty()) {
-            layoutVazio.setVisibility(View.VISIBLE);
-            recyclerItens.setVisibility(View.GONE);
-        } else {
-            layoutVazio.setVisibility(View.GONE);
-            recyclerItens.setVisibility(View.VISIBLE);
-        }
+        boolean vazio = lista.getItens().isEmpty();
+        layoutVazio.setVisibility(vazio ? View.VISIBLE : View.GONE);
+        recyclerItens.setVisibility(vazio ? View.GONE : View.VISIBLE);
     }
 }

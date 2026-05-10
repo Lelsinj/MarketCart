@@ -18,7 +18,7 @@ import java.util.List;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder> {
 
     private List<Item> itens;
-    private OnItemInteractionListener listener;
+    private final OnItemInteractionListener listener;
 
     public interface OnItemInteractionListener {
         void onCheckChanged(Item item, boolean comprado);
@@ -43,56 +43,49 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         Item item = itens.get(position);
 
         holder.txtNome.setText(item.getNome());
-        holder.txtQuantidade.setText(
-                formatarNumero(item.getQuantidade()) + " " + item.getUnidade()
-        );
+        holder.txtQuantidade.setText(formatar(item.getQuantidade()) + " " + item.getUnidade());
         holder.txtCategoria.setText(item.getCategoria());
         holder.txtPreco.setText(String.format("R$ %.2f", item.getPreco()));
 
-        // Atualiza o checkbox sem disparar o listener
+        // Atualiza checkbox sem disparar o listener
         holder.checkComprado.setOnCheckedChangeListener(null);
         holder.checkComprado.setChecked(item.isComprado());
+        aplicarEstilo(holder, item.isComprado());
 
-        // Aplica risco no nome se comprado
-        aplicarEstiloComprado(holder, item.isComprado());
-
-        // Listener do checkbox
         holder.checkComprado.setOnCheckedChangeListener((btn, isChecked) -> {
             item.setComprado(isChecked);
-            aplicarEstiloComprado(holder, isChecked);
+            aplicarEstilo(holder, isChecked);
             listener.onCheckChanged(item, isChecked);
         });
 
-        // Clique longo para excluir
         holder.itemView.setOnLongClickListener(v -> {
             listener.onItemLongClick(item);
             return true;
         });
     }
 
-    private void aplicarEstiloComprado(ItemViewHolder holder, boolean comprado) {
+    /** Aplica risco e opacidade quando o item está comprado */
+    private void aplicarEstilo(ItemViewHolder holder, boolean comprado) {
         if (comprado) {
             holder.txtNome.setPaintFlags(
-                    holder.txtNome.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG
-            );
-            holder.txtNome.setAlpha(0.5f);
+                    holder.txtNome.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.txtNome.setAlpha(0.45f);
+            holder.itemView.setAlpha(0.7f);
         } else {
             holder.txtNome.setPaintFlags(
-                    holder.txtNome.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG)
-            );
+                    holder.txtNome.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
             holder.txtNome.setAlpha(1f);
+            holder.itemView.setAlpha(1f);
         }
     }
 
-    private String formatarNumero(double valor) {
+    private String formatar(double valor) {
         if (valor == (long) valor) return String.valueOf((long) valor);
         return String.valueOf(valor);
     }
 
     @Override
-    public int getItemCount() {
-        return itens.size();
-    }
+    public int getItemCount() { return itens.size(); }
 
     public void atualizarItens(List<Item> novosItens) {
         this.itens = novosItens;
@@ -101,10 +94,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
 
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         CheckBox checkComprado;
-        TextView txtNome;
-        TextView txtQuantidade;
-        TextView txtCategoria;
-        TextView txtPreco;
+        TextView txtNome, txtQuantidade, txtCategoria, txtPreco;
 
         ItemViewHolder(View itemView) {
             super(itemView);
