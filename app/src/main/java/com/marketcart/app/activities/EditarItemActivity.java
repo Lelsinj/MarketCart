@@ -17,56 +17,74 @@ import com.marketcart.app.models.Item;
 import com.marketcart.app.models.ListaCompras;
 import com.marketcart.app.storage.StorageManager;
 
-public class NovoItemActivity extends AppCompatActivity {
+public class EditarItemActivity extends AppCompatActivity {
+
+    public static final String EXTRA_LISTA_ID = "lista_id";
+    public static final String EXTRA_ITEM_ID  = "item_id";
 
     private TextInputLayout layoutNome, layoutQuantidade, layoutPreco;
     private TextInputEditText edtNome, edtQuantidade, edtPreco;
     private AutoCompleteTextView spinnerUnidade, spinnerCategoria;
     private StorageManager storage;
     private ListaCompras lista;
+    private Item item;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_novo_item);
+        setContentView(R.layout.activity_editar_item);
 
         storage = new StorageManager(this);
 
-        String listaId = getIntent().getStringExtra(ItensActivity.EXTRA_LISTA_ID);
+        String listaId = getIntent().getStringExtra(EXTRA_LISTA_ID);
+        String itemId  = getIntent().getStringExtra(EXTRA_ITEM_ID);
+
         lista = storage.buscarListaPorId(listaId);
         if (lista == null) { finish(); return; }
 
+        item = buscarItemPorId(itemId);
+        if (item == null) { finish(); return; }
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Editar Item");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        layoutNome       = findViewById(R.id.layoutNomeProduto);
+        layoutNome      = findViewById(R.id.layoutNomeProduto);
         layoutQuantidade = findViewById(R.id.layoutQuantidade);
-        layoutPreco      = findViewById(R.id.layoutPreco);
-        edtNome          = findViewById(R.id.edtNomeProduto);
-        edtQuantidade    = findViewById(R.id.edtQuantidade);
-        edtPreco         = findViewById(R.id.edtPreco);
-        spinnerUnidade   = findViewById(R.id.spinnerUnidade);
+        layoutPreco     = findViewById(R.id.layoutPreco);
+        edtNome         = findViewById(R.id.edtNomeProduto);
+        edtQuantidade   = findViewById(R.id.edtQuantidade);
+        edtPreco        = findViewById(R.id.edtPreco);
+        spinnerUnidade  = findViewById(R.id.spinnerUnidade);
         spinnerCategoria = findViewById(R.id.spinnerCategoria);
 
+        // Spinners
         String[] unidades = {"un", "kg", "g", "L", "ml", "pct", "cx"};
         spinnerUnidade.setAdapter(new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, unidades));
-        spinnerUnidade.setText(unidades[0], false);
 
         String[] categorias = {"Hortifruti", "Carnes", "Laticínios", "Bebidas",
                                "Limpeza", "Higiene", "Padaria", "Congelados", "Outros"};
         spinnerCategoria.setAdapter(new ArrayAdapter<>(
                 this, android.R.layout.simple_dropdown_item_1line, categorias));
-        spinnerCategoria.setText(categorias[categorias.length - 1], false);
 
-        MaterialButton btnAdicionar = findViewById(R.id.btnAdicionarItem);
-        btnAdicionar.setOnClickListener(v -> salvarItem());
+        // Preenche com os valores atuais do item
+        edtNome.setText(item.getNome());
+        edtQuantidade.setText(formatarNumero(item.getQuantidade()));
+        edtPreco.setText(String.format("%.2f", item.getPreco()));
+        spinnerUnidade.setText(item.getUnidade(), false);
+        spinnerCategoria.setText(item.getCategoria(), false);
+
+        MaterialButton btnSalvar = findViewById(R.id.btnAdicionarItem);
+        btnSalvar.setText("Salvar alterações");
+        btnSalvar.setOnClickListener(v -> salvarEdicao());
     }
 
-    private void salvarItem() {
+    private void salvarEdicao() {
         String nome = edtNome.getText() != null
                 ? edtNome.getText().toString().trim() : "";
 
@@ -117,13 +135,27 @@ public class NovoItemActivity extends AppCompatActivity {
         }
         layoutPreco.setError(null);
 
-        lista.getItens().add(new Item(nome, quantidade,
-                spinnerUnidade.getText().toString(),
-                preco,
-                spinnerCategoria.getText().toString()));
-        storage.atualizarLista(lista);
+        // Atualiza o item
+        item.setNome(nome);
+        item.setQuantidade(quantidade);
+        item.setPreco(preco);
+        item.setUnidade(spinnerUnidade.getText().toString());
+        item.setCategoria(spinnerCategoria.getText().toString());
 
-        Toast.makeText(this, nome + " adicionado!", Toast.LENGTH_SHORT).show();
+        storage.atualizarLista(lista);
+        Toast.makeText(this, "Item atualizado!", Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private Item buscarItemPorId(String itemId) {
+        for (Item i : lista.getItens()) {
+            if (i.getId().equals(itemId)) return i;
+        }
+        return null;
+    }
+
+    private String formatarNumero(double valor) {
+        if (valor == (long) valor) return String.valueOf((long) valor);
+        return String.valueOf(valor);
     }
 }

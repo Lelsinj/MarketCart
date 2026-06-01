@@ -25,9 +25,7 @@ public class ItensActivity extends AppCompatActivity {
 
     private RecyclerView recyclerItens;
     private View layoutVazio;
-    private TextView txtOrcamento;
-    private TextView txtTotal;
-    private TextView txtProgresso;
+    private TextView txtOrcamento, txtTotal, txtProgresso;
     private ItemAdapter adapter;
     private StorageManager storage;
     private ListaCompras lista;
@@ -43,7 +41,6 @@ public class ItensActivity extends AppCompatActivity {
         lista = storage.buscarListaPorId(listaId);
         if (lista == null) { finish(); return; }
 
-        // Toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -52,12 +49,11 @@ public class ItensActivity extends AppCompatActivity {
         }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        // Views
-        recyclerItens  = findViewById(R.id.recyclerItens);
-        layoutVazio    = findViewById(R.id.layoutVazio);
-        txtOrcamento   = findViewById(R.id.txtOrcamento);
-        txtTotal       = findViewById(R.id.txtTotal);
-        txtProgresso   = findViewById(R.id.txtProgresso);
+        recyclerItens = findViewById(R.id.recyclerItens);
+        layoutVazio   = findViewById(R.id.layoutVazio);
+        txtOrcamento  = findViewById(R.id.txtOrcamento);
+        txtTotal      = findViewById(R.id.txtTotal);
+        txtProgresso  = findViewById(R.id.txtProgresso);
 
         recyclerItens.setLayoutManager(new LinearLayoutManager(this));
 
@@ -65,7 +61,6 @@ public class ItensActivity extends AppCompatActivity {
 
             @Override
             public void onCheckChanged(Item item, boolean comprado) {
-                // Atualiza o item na lista em memória e persiste
                 item.setComprado(comprado);
                 storage.atualizarLista(lista);
                 atualizarResumo();
@@ -73,17 +68,33 @@ public class ItensActivity extends AppCompatActivity {
 
             @Override
             public void onItemLongClick(Item item) {
+                // Menu com opções: Editar ou Excluir
+                String[] opcoes = {"✏️  Editar item", "🗑️  Excluir item"};
                 new AlertDialog.Builder(ItensActivity.this)
-                        .setTitle("Excluir item")
-                        .setMessage("Deseja excluir \"" + item.getNome() + "\"?")
-                        .setPositiveButton("Excluir", (d, w) -> {
-                            lista.getItens().remove(item);
-                            storage.atualizarLista(lista);
-                            adapter.atualizarItens(lista.getItens());
-                            atualizarEstadoVazio();
-                            atualizarResumo();
+                        .setTitle(item.getNome())
+                        .setItems(opcoes, (dialog, which) -> {
+                            if (which == 0) {
+                                // Editar
+                                Intent intent = new Intent(ItensActivity.this, EditarItemActivity.class);
+                                intent.putExtra(EditarItemActivity.EXTRA_LISTA_ID, lista.getId());
+                                intent.putExtra(EditarItemActivity.EXTRA_ITEM_ID, item.getId());
+                                startActivity(intent);
+                            } else {
+                                // Excluir com confirmação
+                                new AlertDialog.Builder(ItensActivity.this)
+                                        .setTitle("Excluir item")
+                                        .setMessage("Deseja excluir \"" + item.getNome() + "\"?")
+                                        .setPositiveButton("Excluir", (d, w) -> {
+                                            lista.getItens().remove(item);
+                                            storage.atualizarLista(lista);
+                                            adapter.atualizarItens(lista.getItens());
+                                            atualizarEstadoVazio();
+                                            atualizarResumo();
+                                        })
+                                        .setNegativeButton("Cancelar", null)
+                                        .show();
+                            }
                         })
-                        .setNegativeButton("Cancelar", null)
                         .show();
             }
         });
@@ -103,7 +114,6 @@ public class ItensActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Recarrega do storage para refletir itens recém-adicionados
         lista = storage.buscarListaPorId(lista.getId());
         if (lista == null) { finish(); return; }
         if (getSupportActionBar() != null) getSupportActionBar().setTitle(lista.getNome());
@@ -112,7 +122,6 @@ public class ItensActivity extends AppCompatActivity {
         atualizarResumo();
     }
 
-    /** Atualiza os valores de orçamento, total e progresso no card superior */
     private void atualizarResumo() {
         double orcamento = lista.getOrcamento();
         double total     = lista.calcularTotal();
@@ -122,13 +131,12 @@ public class ItensActivity extends AppCompatActivity {
         txtOrcamento.setText(String.format("R$ %.2f", orcamento));
         txtTotal.setText(String.format("R$ %.2f", total));
 
-        if (txtProgresso != null) {
+        if (txtProgresso != null)
             txtProgresso.setText(comprados + " de " + totalItens + " itens comprados");
-        }
 
-        // Aviso visual se ultrapassar orçamento
+        // Vermelho se ultrapassar orçamento
         if (orcamento > 0 && total > orcamento) {
-            txtTotal.setTextColor(Color.parseColor("#FF5252")); // vermelho
+            txtTotal.setTextColor(Color.parseColor("#FF5252"));
         } else {
             txtTotal.setTextColor(Color.WHITE);
         }

@@ -50,14 +50,29 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onListaLongClick(ListaCompras lista) {
+                // Menu com opções: Editar ou Excluir
+                String[] opcoes = {"✏️  Editar lista", "🗑️  Excluir lista"};
                 new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Excluir lista")
-                        .setMessage("Deseja excluir \"" + lista.getNome() + "\"?\nEsta ação não pode ser desfeita.")
-                        .setPositiveButton("Excluir", (d, w) -> {
-                            storage.removerLista(lista.getId());
-                            recarregarListas();
+                        .setTitle(lista.getNome())
+                        .setItems(opcoes, (dialog, which) -> {
+                            if (which == 0) {
+                                // Editar
+                                Intent intent = new Intent(MainActivity.this, EditarListaActivity.class);
+                                intent.putExtra(EditarListaActivity.EXTRA_LISTA_ID, lista.getId());
+                                startActivity(intent);
+                            } else {
+                                // Excluir com confirmação
+                                new AlertDialog.Builder(MainActivity.this)
+                                        .setTitle("Excluir lista")
+                                        .setMessage("Deseja excluir \"" + lista.getNome() + "\"?\nEsta ação não pode ser desfeita.")
+                                        .setPositiveButton("Excluir", (d, w) -> {
+                                            storage.removerLista(lista.getId());
+                                            recarregarListas();
+                                        })
+                                        .setNegativeButton("Cancelar", null)
+                                        .show();
+                            }
                         })
-                        .setNegativeButton("Cancelar", null)
                         .show();
             }
         });

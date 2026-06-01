@@ -10,7 +10,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MarketCart">
 
-        <!-- Tela de Splash (inicial) -->
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true"
@@ -21,25 +20,26 @@
             </intent-filter>
         </activity>
 
-        <!-- Tela principal: lista de compras -->
-        <activity
-            android:name=".activities.MainActivity"
+        <activity android:name=".activities.MainActivity"
             android:exported="false" />
 
-        <!-- Tela de itens de uma lista -->
-        <activity
-            android:name=".activities.ItensActivity"
+        <activity android:name=".activities.ItensActivity"
             android:exported="false" />
 
-        <!-- Formulário: nova lista -->
-        <activity
-            android:name=".activities.NovaListaActivity"
+        <activity android:name=".activities.NovaListaActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <!-- Formulário: novo item -->
-        <activity
-            android:name=".activities.NovoItemActivity"
+        <activity android:name=".activities.NovoItemActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- Novas activities da Entrega 4 -->
+        <activity android:name=".activities.EditarListaActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity android:name=".activities.EditarItemActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

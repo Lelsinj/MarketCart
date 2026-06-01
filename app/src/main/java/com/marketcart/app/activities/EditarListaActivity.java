@@ -14,37 +14,53 @@ import com.marketcart.app.R;
 import com.marketcart.app.models.ListaCompras;
 import com.marketcart.app.storage.StorageManager;
 
-public class NovaListaActivity extends AppCompatActivity {
+public class EditarListaActivity extends AppCompatActivity {
+
+    public static final String EXTRA_LISTA_ID = "lista_id";
 
     private TextInputLayout layoutNome;
     private TextInputEditText edtNome, edtOrcamento;
     private StorageManager storage;
+    private ListaCompras lista;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nova_lista);
+        setContentView(R.layout.activity_editar_lista);
+
+        storage = new StorageManager(this);
+
+        String listaId = getIntent().getStringExtra(EXTRA_LISTA_ID);
+        lista = storage.buscarListaPorId(listaId);
+        if (lista == null) { finish(); return; }
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Editar Lista");
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
 
-        storage      = new StorageManager(this);
         layoutNome   = findViewById(R.id.layoutNomeLista);
         edtNome      = findViewById(R.id.edtNomeLista);
         edtOrcamento = findViewById(R.id.edtOrcamento);
 
+        // Preenche os campos com os valores atuais
+        edtNome.setText(lista.getNome());
+        if (lista.getOrcamento() > 0) {
+            edtOrcamento.setText(String.format("%.2f", lista.getOrcamento()));
+        }
+
         MaterialButton btnSalvar = findViewById(R.id.btnSalvarLista);
-        btnSalvar.setOnClickListener(v -> salvarLista());
+        btnSalvar.setOnClickListener(v -> salvarEdicao());
     }
 
-    private void salvarLista() {
+    private void salvarEdicao() {
         String nome = edtNome.getText() != null
                 ? edtNome.getText().toString().trim() : "";
 
-        // Validação: nome obrigatório e mínimo 2 caracteres
+        // Validação: nome obrigatório
         if (TextUtils.isEmpty(nome)) {
             layoutNome.setError("Nome obrigatório");
             return;
@@ -55,7 +71,7 @@ public class NovaListaActivity extends AppCompatActivity {
         }
         layoutNome.setError(null);
 
-        // Validação: orçamento não pode ser negativo
+        // Validação: orçamento
         double orcamento = 0;
         String orcStr = edtOrcamento.getText() != null
                 ? edtOrcamento.getText().toString().trim() : "";
@@ -72,8 +88,11 @@ public class NovaListaActivity extends AppCompatActivity {
             }
         }
 
-        storage.adicionarLista(new ListaCompras(nome, orcamento));
-        Toast.makeText(this, "Lista \"" + nome + "\" criada!", Toast.LENGTH_SHORT).show();
+        lista.setNome(nome);
+        lista.setOrcamento(orcamento);
+        storage.atualizarLista(lista);
+
+        Toast.makeText(this, "Lista atualizada!", Toast.LENGTH_SHORT).show();
         finish();
     }
 }
